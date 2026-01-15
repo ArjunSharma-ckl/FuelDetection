@@ -1,0 +1,8 @@
+path: PH2026FuelDetection.v1i.yolov8
+
+train: train/images
+val: train/images
+test: train/images
+
+names:
+  0: fuel
