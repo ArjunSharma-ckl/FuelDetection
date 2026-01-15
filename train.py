@@ -12,9 +12,9 @@ DATA_YAML = "PH2026FuelDetection.v1i.yolov8/data.yaml"
 BASE_MODEL = "yolo26n.pt"   # YOLO26n
 IMG_SIZE = 640
 BATCH = 16
-EPOCHS = 60              # early stopping decides
-PATIENCE = 20
-WORKERS = 8
+EPOCHS = 10000              # early stopping decides
+PATIENCE = 100
+WORKERS = 20
 DEVICE = 0
 
 EXPORT_ROOT = Path("exports")
