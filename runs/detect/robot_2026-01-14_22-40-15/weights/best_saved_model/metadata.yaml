@@ -1,0 +1,22 @@
+description: Ultralytics YOLO26n model trained on PH2026FuelDetection.v1i.yolov8/data.yaml
+author: Ultralytics
+date: '2026-01-14T22:44:34.229418'
+version: 8.4.2
+license: AGPL-3.0 License (https://ultralytics.com/license)
+docs: https://docs.ultralytics.com
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 640
+- 640
+names:
+  0: fuel
+args:
+  batch: 1
+  fraction: 1.0
+  half: true
+  int8: false
+  nms: false
+channels: 3
+end2end: true

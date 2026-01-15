@@ -1,4 +1,4 @@
-from ultralytics import YOLO
+from ultralytics import YOLO, __version__ as ULTRALYTICS_VERSION
 import torch
 import multiprocessing as mp
 from datetime import datetime
@@ -9,11 +9,11 @@ import shutil
 # CONFIG
 # -------------------------------------------------
 DATA_YAML = "PH2026FuelDetection.v1i.yolov8/data.yaml"
-BASE_MODEL = "yolov8s.pt"   # BEST balance for Limelight
+BASE_MODEL = "yolo26n.pt"   # YOLO26n
 IMG_SIZE = 640
-BATCH = 32
+BATCH = 16
 EPOCHS = 60              # early stopping decides
-PATIENCE = 45
+PATIENCE = 20
 WORKERS = 8
 DEVICE = 0
 
@@ -22,6 +22,30 @@ EXPORT_ROOT = Path("exports")
 # -------------------------------------------------
 # MAIN
 # -------------------------------------------------
+def version_tuple(version: str) -> tuple[int, int, int]:
+    parts = []
+    for chunk in version.split("."):
+        num = ""
+        for ch in chunk:
+            if ch.isdigit():
+                num += ch
+            else:
+                break
+        if num:
+            parts.append(int(num))
+    while len(parts) < 3:
+        parts.append(0)
+    return tuple(parts[:3])
+
+
+def require_ultralytics(min_version: str, reason: str) -> None:
+    if version_tuple(ULTRALYTICS_VERSION) < version_tuple(min_version):
+        raise RuntimeError(
+            f"{reason}. Installed ultralytics {ULTRALYTICS_VERSION}. "
+            "Run: pip install -U ultralytics"
+        )
+
+
 def main():
     # ---------- GPU CHECK ----------
     assert torch.cuda.is_available(), "CUDA not available"
@@ -33,6 +57,8 @@ def main():
     run_name = f"robot_{timestamp}"
 
     # ---------- LOAD MODEL ----------
+    if BASE_MODEL.startswith("yolo26"):
+        require_ultralytics("8.4.0", "YOLO26 models require ultralytics>=8.4.0")
     model = YOLO(BASE_MODEL)
 
     # ---------- TRAIN (IMPROVED CONFIG) ----------
@@ -45,24 +71,27 @@ def main():
         workers=WORKERS,
 
         optimizer="AdamW",
-        lr0=0.00035,
+        lr0=0.0015,
+        lrf=0.01,
         cos_lr=True,
         patience=PATIENCE,
-        cache="disk",
+        cache="ram",
 
         # ---- FRC-OPTIMIZED AUGMENTATIONS ----
-        hsv_h=0.01,
-        hsv_s=0.45,
-        hsv_v=0.35,
+        hsv_h=0.02,
+        hsv_s=0.6,
+        hsv_v=0.4,
 
-        degrees=2.0,
-        translate=0.04,
-        scale=0.25,
+        degrees=3.0,
+        translate=0.07,
+        scale=0.4,
 
         fliplr=0.5,
-        mosaic=0.2,
-        close_mosaic=20,
-        mixup=0.0,
+        mosaic=0.4,
+        close_mosaic=10,
+        mixup=0.1,
+        copy_paste=0.1,
+        erasing=0.2,
 
         name=run_name,
         exist_ok=False
@@ -74,7 +103,7 @@ def main():
     best_pt = weights_dir / "best.pt"
 
     if not best_pt.exists():
-        print("❌ best.pt not found — training failed")
+        print("ERROR: best.pt not found. Training failed.")
         return
 
     # ---------- EXPORT FP16 TFLITE (SAFE PATH) ----------
@@ -88,9 +117,11 @@ def main():
     )
 
     # Find produced TFLite
-    tflite_files = list(weights_dir.rglob("*.tflite"))
+    tflite_files = sorted(weights_dir.rglob("*_float16.tflite"), key=lambda p: str(p))
     if not tflite_files:
-        print("❌ TFLite export failed")
+        tflite_files = sorted(weights_dir.rglob("*.tflite"), key=lambda p: str(p))
+    if not tflite_files:
+        print("ERROR: TFLite export failed.")
         return
 
     best_tflite = tflite_files[0]
@@ -115,16 +146,16 @@ def main():
 
     # Write labels file for Limelight
     labels_txt = latest_dir / "labels.txt"
-    labels_txt.write_text("Robot\n")
+    labels_txt.write_text("fuel\n", encoding="utf-8")
 
     shutil.copy(labels_txt, archive_dir / "labels.txt")
 
     # ---------- DONE ----------
-    print("\n✅ TRAINING COMPLETE")
+    print("\nTRAINING COMPLETE")
     print("Run folder:", run_dir)
     print("Best model:", best_pt)
     print("TFLite model:", best_tflite)
-    print("\n📤 Upload to Limelight from:")
+    print("\nUpload to Limelight from:")
     print(latest_dir)
 
 
