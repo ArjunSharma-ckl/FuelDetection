@@ -1,0 +1,16 @@
+--extra-index-url https://download.pytorch.org/whl/cu121
+ultralytics==8.4.2
+torch==2.5.1+cu121
+torchvision==0.20.1+cu121
+numpy==1.26.4
+opencv-python==4.11.0.86
+pyyaml==6.0.2
+# Optional export deps (uncomment if needed)
+# onnx==1.20.1
+# onnxruntime==1.18.1
+# onnx2tf==1.22.0
+# tensorflow==2.19.0
+# tf_keras==2.19.0
+# onnxslim==0.1.82
+# sng4onnx==1.0.1
+# onnx_graphsurgeon==0.3.26
