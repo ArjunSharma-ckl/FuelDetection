@@ -14,7 +14,7 @@ IMG_SIZE = 640
 BATCH = 16
 EPOCHS = 10000              # early stopping decides
 PATIENCE = 100
-WORKERS = 20
+WORKERS = mp.cpu_count()    # max it out babyyyy
 DEVICE = 0
 
 EXPORT_ROOT = Path("exports")
