@@ -9,8 +9,8 @@ pyyaml==6.0.2
 onnx==1.20.1
 onnxruntime==1.18.1
 onnx2tf==1.22.0
-# tensorflow==2.19.0
-# tf_keras==2.19.0
+tensorflow==2.19.0
+tf_keras==2.19.0
 onnxslim==0.1.82
-# sng4onnx==1.0.1
-# onnx_graphsurgeon==0.3.26
+sng4onnx==1.0.1
+onnx_graphsurgeon==0.3.26
