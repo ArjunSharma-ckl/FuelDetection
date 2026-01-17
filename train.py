@@ -9,7 +9,7 @@ import shutil
 # CONFIG
 # -------------------------------------------------
 DATA_YAML = "PH2026FuelDetection.v1i.yolov8/data.yaml"
-BASE_MODEL = "yolo26n.pt"   # YOLO26n
+BASE_MODEL = "yolov11n.pt"   # YOLOv11n
 IMG_SIZE = 640
 BATCH = 16
 EPOCHS = 10000              # early stopping decides
